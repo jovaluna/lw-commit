@@ -1,0 +1,125 @@
+#!/bin/bash
+
+##### Functions #####
+usage() {
+    echo "usage: lw-commit [-s scheme-name] ([-d device-id] | [-dn device-name]) [-m 'commit message']"
+}
+
+branchCheck() {
+    if [ "$currentBranch" = "develop" ] || [ "$currentBranch" = "master" ]   
+    then
+        echo "The current branch is '$currentBranch'. Please use another branch to commit."
+        exit 1
+    fi
+}
+
+runUnitTest() {
+    platform=
+    if [ "$deviceId" != "" ]
+    then
+        platform="id=$deviceId"
+    elif [ "$deviceName" != "" ]
+    then
+        platform="name=$deviceName"
+    else
+        echo "Select a device destination"
+        echo "For show the current devices run: (\"instruments -s devices\")"
+        usage
+        exit 9
+    fi
+    xcodebuild -workspace Lively.xcworkspace -scheme $scheme -destination "platform=iOS,$platform" test
+}
+
+exitIfUnitTestHasError() {
+    runUnitTestExitCode=$?
+    if [ $runUnitTestExitCode != 0 ]
+    then
+        echo "Unit test error code '$runUnitTestExitCode'."
+        exit $runUnitTestExitCode
+    else
+        echo "Unit test success"
+    fi
+}
+
+commitChangesIfNeeded() {
+    if [ "$commitMessage" != "" ]
+    then
+        commitChanges
+        exitIfCommitHasError
+    fi
+}
+
+commitChanges() {
+    git commit -m "$commitMessage"
+}
+
+exitIfCommitHasError() {
+    commitError=$?
+    if [ $commitError != 0 ]
+    then
+        echo "Commit error '$commitError'."
+        exit $commitError
+    else
+        echo "Commit success"
+    fi
+}
+
+pushChanges() {
+    git push -u origin $currentBranch
+}
+
+exitIfPushHasError() {
+    pushError=$?
+    if [ $pushError != 0 ]
+    then
+        echo "Push error '$pushError'."
+        exit $pushError
+    else
+        echo "Push success"
+    fi
+}
+
+##### Main #####
+
+scheme="Lively-Release-QA"
+deviceName= 
+deviceId=
+commitMessage=
+currentBranch=$(git branch | grep \* | cut -d ' ' -f2)
+
+if [ "$#" = "0" ]
+then
+    usage
+    exit 1
+fi
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -s | --scheme ) shift
+                                scheme=$1
+                                ;;
+        -d | --deviceId ) shift
+                                deviceId=$1
+                                ;;
+        -dn | --deviceName ) shift
+                                deviceName=$1
+                                ;;
+        -m | --commitMessage ) shift
+                                commitMessage=$1
+                                ;;
+                                
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+branchCheck
+runUnitTest
+exitIfUnitTestHasError
+commitChangesIfNeeded
+pushChanges
+exitIfPushHasError
