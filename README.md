@@ -8,6 +8,7 @@ lw-commit [-s scheme-name] ([-d device-id] | [-dn device-name]) [-m 'commit mess
 
 - **-s** (scheme name): This option specify the scheme for run the test. Default `Lively-Release-QA`.
 - **-m** : If this option is set, the tracked changes will be commited.
+
 Device id (-d) or device name (-dn) is **required** to run unit tests:
 - **-d** : Device id (UUID).
     ```bash
