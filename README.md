@@ -15,8 +15,9 @@ lw-commit [-s scheme-name] ([-d device-id] | [-dn device-name]) [-m 'commit mess
     ```bash
     lw-commit -dn "Jovani's iPhone"
     ```
-Device id (-d) or device name (-dn) is **required** to run unit tests:
-*To show current devices:*
+Device id (-d) or device name (-dn) is **required** to run unit tests
+
+_To show current devices:_
 ```bash
 instruments -s devices
 ```
