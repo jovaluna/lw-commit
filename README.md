@@ -19,7 +19,8 @@ Device id (-d) **or** device name (-dn) is **required** to run unit tests:
     lw-commit -dn "Jovani's iPhone"
     ```
 
-_To show current devices:_
+## Notes
+To show available devices, run:
 ```bash
 instruments -s devices
 ```
